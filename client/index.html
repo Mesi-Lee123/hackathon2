@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <title>AI Recipe Recommender</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color:blueviolet;
+    }
+
+    p {
+      text-align: center;
+      color: #555;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      background:orangered;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #1b5e20;
+    }
+
+    .result {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f1f8e9;
+      border-left: 5px solid #2e7d32;
+      border-radius: 8px;
+      display: none;
+    }
+    .recipes{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .recipe_card{
+      margin-top: 2px;
+      margin-bottom: 2px;
+      cursor: pointer;
+    }
+    .recipe_card:hover{
+        transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+     
+    }
+
+    #recipeModal .modal-content {
+  height: 90vh;        /* take 90% of viewport height */
+  overflow-y: auto;    /* scrollable when content exceeds */
+}
+
+#recipeModal .modal-body {
+  max-height: 75vh;    /* keep header/footer visible */
+  overflow-y: auto;
+}
+.modal-body{
+  height: 90vh !important;
+ 
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🥗 AI Recipe Recommender</h1>
+    <p>Enter ingredients you have, and we’ll suggest a recipe!</p>
+
+    <form id="recipeForm">
+      <label for="ingredients">Your Ingredients:</label>
+      <textarea id="ingredients" placeholder="e.g. rice, chicken, tomatoes"></textarea>
+
+      <button type="submit">Get Recipe</button>
+    </form>
+
+    <div class="result" id="resultBox">
+      <h3>🍴 Suggested Recipe:</h3>
+      <div id="recipeText" class="recipes"></div>
+    </div>
+  </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="recipeModal" tabindex="-1" aria-labelledby="recipeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable"> 
+    <!-- modal-xl = wider modal, modal-dialog-scrollable = scrolling content -->
+    <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="recipeModalLabel">Recipe Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalContent">
+        <!-- Recipe details will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <script>
+ document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("recipeForm");
+  const resultBox = document.getElementById("resultBox");
+  const recipeText = document.getElementById("recipeText");
+
+  const get_recipe_requestOptions = {
+      //    headers: {
+      //   'Content-Type': 'application/json'
+      // },
+      
+  };
+
+  fetch("http://localhost:5000/getrecipe")
+  .then(res => res.json())
+  .then(data => {
+    // const parsed = data.recipes.map(r => ({
+    //   ...r,
+    //   recipe: JSON.parse(r.recipe) // convert recipe string into JSON object
+    // }));
+    console.log(data.recipes);
+    const container = document.getElementById("recipeText");
+        data.recipes?.forEach((rcp, index) => {
+      const create_recipe = document.createElement("div");
+      create_recipe.classList.add("recipe_card");
+
+      create_recipe.innerHTML = `
+        <div class="card" style="width: 18rem;">
+    <div class="card-body">
+    <h5 class="card-title">${rcp?.ingredients}</h5>
+      </div>
+</div>
+    `;
+
+        // Add click event to open modal with details
+  create_recipe.addEventListener("click", () => {
+    
+console.log("clean job",rcp);
+
+    document.getElementById("modalContent").innerHTML = `
+      <h5>${rcp?.ingredients}</h5>
+      <p>${rcp?.recipe}</p>
+    `;
+  //   const ul = document.createElement("ul");
+  // rcp?.recipe?.recipes.forEach(item => {
+  //   const li = document.createElement("li");
+  //   li.textContent = item?.instructions;
+  //   ul.appendChild(li);
+  // });
+  //    document.getElementById("modalContent").appendChild(ul);
+    // Open modal (Bootstrap 5)
+    const myModal = new bootstrap.Modal(document.getElementById("recipeModal"));
+    myModal.show();
+  });
+
+      container.appendChild(create_recipe);
+})
+  })
+  .catch(error =>{
+    console.log(error)
+  })
+
+  //request open ai
+  form.addEventListener("submit", function(e) {
+     e.preventDefault();
+       const ingredients = document.getElementById("ingredients").value.trim();
+       if(!ingredients){
+        alert("please add ingredients")
+       }
+
+      const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ingredients:ingredients})
+    };
+
+     fetch('http://localhost:5000/recipe', requestOptions)
+      .then(response => {
+         // Check if the response was successful (e.g., status 200-299)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json(); // Parse the JSON response
+      })
+       .then(data => {
+        // fetched_data = data?.recipe
+        console.log('Success:', data?.recipe);
+        document.getElementById("ingredients").value = "";
+      })
+       .catch(error => {
+        console.error('Error:', error); // Handle any errors during the fetch operation
+      });
+  })
+resultBox.style.display = "block";
+ }) 
+  </script>
+</body>
+</html>
