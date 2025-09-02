@@ -157,7 +157,7 @@
       
   };
 
-  fetch("http://localhost:5000/getrecipe")
+  fetch("https://thistleharrier.onpella.app/getrecipe")
   .then(res => res.json())
   .then(data => {
     // const parsed = data.recipes.map(r => ({
@@ -222,7 +222,7 @@ console.log("clean job",rcp);
       body: JSON.stringify({ingredients:ingredients})
     };
 
-     fetch('http://localhost:5000/recipe', requestOptions)
+     fetch('https://thistleharrier.onpella.app/recipe', requestOptions)
       .then(response => {
          // Check if the response was successful (e.g., status 200-299)
         if (!response.ok) {
